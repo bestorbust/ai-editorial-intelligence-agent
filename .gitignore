@@ -38,5 +38,5 @@ Thumbs.db
 *.sw?
 
 # --- Frontend Specific (if needed separately) ---
-frontend/node_modules/ 
-frontend/dist/   
+# frontend/node_modules/ 
+# frontend/dist/   
