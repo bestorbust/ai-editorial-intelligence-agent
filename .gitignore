@@ -1,0 +1,42 @@
+# --- Python & Backend ---
+.venv/
+.env
+__pycache__/
+*.pyc
+artifacts/
+data/
+docs/
+notebooks/
+tests/
+
+# --- Logs ---
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Dependencies (Recursive) ---
+# This ignores node_modules in frontend/, backend/, and root
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# --- Editor & OS ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- Frontend Specific (if needed separately) ---
+frontend/node_modules/ 
+frontend/dist/   
