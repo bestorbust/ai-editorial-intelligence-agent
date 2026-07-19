@@ -12,7 +12,66 @@ import requests
 
 scheduler = BackgroundScheduler()
 
+# backend/api/app.py
 
+import os
+import sys
+import traceback
+import psutil
+
+# 1. Debug Memory Immediately
+process = psutil.Process(os.getpid())
+print(f"🚀 [STARTUP] Process Started. PID: {os.getpid()}")
+print(f"💾 [MEMORY] Initial Memory Usage: {process.memory_info().rss / 1024 / 1024:.2f} MB")
+
+try:
+    from fastapi import FastAPI
+    from fastapi.middleware.cors import CORSMiddleware
+    
+    # 2. Debug Imports (Common crash point for Spacy/KeyBERT)
+    print("⏳ [IMPORT] Loading dependencies...")
+    
+    app = FastAPI()
+    
+    # Add CORS
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"], # Tighten this in production
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # 3. Debug Model Loading (Do NOT load Spacy/KeyBERT globally yet)
+    # If you have global imports like `import spacy` or `nlp = spacy.load(...)`, 
+    # COMMENT THEM OUT temporarily to see if the server starts.
+    
+    @app.get("/health")
+    def health_check():
+        current_mem = process.memory_info().rss / 1024 / 1024
+        return {"status": "ok", "memory_mb": round(current_mem, 2)}
+
+    # 4. Catch Startup Events
+    @app.on_event("startup")
+    async def startup_event():
+        print("✅ [STARTUP] FastAPI App Started Successfully")
+        print(f"💾 [MEMORY] Memory at Startup: {process.memory_info().rss / 1024 / 1024:.2f} MB")
+        
+        # Try importing your heavy modules here to see if they crash the server
+        try:
+            print("⏳ [LOAD] Attempting to load AI modules (Lazy Load Check)...")
+            # DO NOT initialize them yet, just import
+            from backend.intelligence.trend_discovery.processors.keyword_extractor import KeywordExtractor
+            print("✅ [LOAD] KeywordExtractor module imported successfully (Not initialized)")
+        except Exception as e:
+            print(f"❌ [ERROR] Failed to import module: {e}")
+            traceback.print_exc()
+
+except Exception as e:
+    print(f"❌ [CRITICAL FATAL ERROR] Application failed to start: {e}")
+    traceback.print_exc()
+    sys.exit(1)   
+    
 def scheduled_refresh():
     """
     Automatically trigger intelligence refresh every 30 minutes.
