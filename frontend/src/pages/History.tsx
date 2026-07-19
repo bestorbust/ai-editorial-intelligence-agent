@@ -4,9 +4,50 @@ import type { HistorySnapshot } from "../types/api";
 import { formatDateTime } from "../lib/format";
 import { Clock, FileText, Layers, Newspaper, Lightbulb } from "lucide-react";
 
+// Today's date in Asia/Kolkata as YYYY-MM-DD
+function todayISTString(): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+  const y = parts.find((p) => p.type === "year")?.value ?? "1970";
+  const m = parts.find((p) => p.type === "month")?.value ?? "01";
+  const d = parts.find((p) => p.type === "day")?.value ?? "01";
+  return `${y}-${m}-${d}`;
+}
+
+// Get IST YYYY-MM-DD for a given ISO timestamp (backend returns UTC)
+function istDateString(iso: string): string {
+  const hasTz = /Z$|[+-]\d{2}:\d{2}$/.test(iso);
+  const date = new Date(hasTz ? iso : `${iso}Z`);
+  return todayISTStringFromDate(date);
+}
+
+function todayISTStringFromDate(date: Date): string {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const y = parts.find((p) => p.type === "year")?.value ?? "1970";
+  const m = parts.find((p) => p.type === "month")?.value ?? "01";
+  const d = parts.find((p) => p.type === "day")?.value ?? "01";
+  return `${y}-${m}-${d}`;
+}
+
+function shiftDate(iso: string, days: number): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + days);
+  return dt.toISOString().slice(0, 10);
+}
+
 export default function History() {
   const [history, setHistory] = useState<HistorySnapshot[]>([]);
-  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedDate, setSelectedDate] = useState<string>(() => todayISTString());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -15,11 +56,30 @@ export default function History() {
     setError(null);
 
     try {
-      const data = await intelligenceApi.getHistory(
-        selectedDate || undefined
+      // Backend interprets ?date as server-local. Fetch neighboring days
+      // and filter to snapshots whose IST date matches the selected date.
+      const target = selectedDate || todayISTString();
+      const days = [shiftDate(target, -1), target, shiftDate(target, 1)];
+      const results = await Promise.all(
+        days.map((d) =>
+          intelligenceApi.getHistory(d).catch(() => [] as HistorySnapshot[])
+        )
       );
-
-      setHistory(data);
+      const seen = new Set<number>();
+      const merged: HistorySnapshot[] = [];
+      for (const list of results) {
+        for (const snap of list) {
+          if (seen.has(snap.id)) continue;
+          if (istDateString(snap.created_at) !== target) continue;
+          seen.add(snap.id);
+          merged.push(snap);
+        }
+      }
+      merged.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      setHistory(merged);
     } catch (err) {
       setError(
         err instanceof Error

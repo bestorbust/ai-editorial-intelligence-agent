@@ -53,6 +53,7 @@ praw==8.0.2
 prawcore==4.0.0
 preshed==3.0.13
 protobuf==7.35.1
+psutil==7.2.2
 psycopg2-binary==2.9.12
 pycparser==3.0
 pydantic==2.13.4
@@ -78,7 +79,7 @@ sgmllib3k==1.0.0
 shellingham==1.5.4
 six==1.17.0
 smart_open==8.0.1
-spacy==3.8.13   
+spacy==3.8.14
 spacy-legacy==3.0.12
 spacy-loggers==1.0.5
 SQLAlchemy==2.0.51

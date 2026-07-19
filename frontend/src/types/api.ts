@@ -74,7 +74,6 @@ export interface Opportunity {
 
   cluster_id: number;
 
-  // Backend currently returns null for this field
   story_idx: number | null;
 
   title: string;
