@@ -1,5 +1,5 @@
 import re
-import spacy
+
 from keybert import KeyBERT
 
 from backend.shared.models import EMBEDDING_MODEL
@@ -10,10 +10,7 @@ class KeywordExtractor:
 
     def __init__(self):
         self.kw_model = KeyBERT(EMBEDDING_MODEL)
-        self.nlp = spacy.load(
-            "en_core_web_sm",
-            disable=["ner", "lemmatizer"],
-        )
+        
 
         # Skip KeyBERT for very short content
         self.MIN_WORDS_FOR_KEYBERT = 25
@@ -56,6 +53,11 @@ class KeywordExtractor:
         self,
         topics: list[TopicData],
     ) -> list[TopicData]:
+        import spacy
+        nlp = spacy.load(
+            "en_core_web_sm",
+            disable=["ner", "lemmatizer"],
+        )
 
         texts = [
             f"{topic.title}. {topic.summary or ''}"
