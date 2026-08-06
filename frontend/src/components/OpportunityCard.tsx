@@ -114,6 +114,9 @@ export default function OpportunityCard({
     opportunity.recommended_formats || [];
 
 
+  const category = (opportunity as any).category;
+
+
   // =========================================================
   // Render
   // =========================================================
@@ -161,7 +164,7 @@ export default function OpportunityCard({
           "
         >
 
-          #{opportunity.rank}
+          Rank #{opportunity.rank}
 
         </div>
 
@@ -263,7 +266,7 @@ export default function OpportunityCard({
           Meta Information
       ===================================================== */}
 
-      <div
+      {/* <div
         className="
           mt-4
           flex
@@ -275,7 +278,6 @@ export default function OpportunityCard({
         "
       >
 
-        {/* Cluster Size */}
 
         <div
           className="
@@ -295,7 +297,6 @@ export default function OpportunityCard({
         </div>
 
 
-        {/* Source Count */}
 
         {sources.length > 0 && (
 
@@ -318,7 +319,30 @@ export default function OpportunityCard({
 
         )}
 
-      </div>
+      </div> */}
+      <div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-[--color-ink-subtle]">
+
+  <div className="flex items-center gap-1">
+    <Newspaper className="h-3.5 w-3.5" />
+    <span>
+      {opportunity.cluster_size ?? 0} Related Articles
+    </span>
+  </div>
+
+  <div className="flex items-center gap-1">
+    <Building2 className="h-3.5 w-3.5" />
+    <span>
+      {sources.length} Sources
+    </span>
+  </div>
+
+  {category && (
+    <span className="rounded-md bg-[--color-surface-muted] px-2 py-1">
+      {category}
+    </span>
+  )}
+
+</div>
 
 
       {/* =====================================================

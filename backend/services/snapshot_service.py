@@ -156,7 +156,10 @@ class SnapshotService:
                     "summary":opportunity.get("summary",""),
                     "strengths":opportunity.get("strengths",[]),
                     "weaknesses":opportunity.get("weaknesses",[]),
-                    "recommended_formats":opportunity.get("recommended_fromats",[]),
+                    "recommended_formats": opportunity.get(
+                        "recommended_formats",
+                        [],
+                    ),
                     "sources":opportunity.get("sources",[]),
                     "scores":opportunity.get("scores",{}),
                     "keywords":opportunity.get("keywords",[]),

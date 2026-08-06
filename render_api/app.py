@@ -56,6 +56,24 @@ def get_latest_snapshot(db: Session):
     )
 
 
+# def serialize_topic(topic: Topic):
+#     return {
+#         "id": topic.id,
+#         "title": topic.title,
+#         "summary": topic.summary,
+#         "source": topic.source,
+#         "source_url": topic.source_url,
+#         "category": topic.category,
+#         "language": topic.language,
+#         "country": topic.country,
+#         "keywords": topic.keywords or [],
+#         "entities": topic.entities or [],
+#         "trend_score": topic.trend_score,
+#         "confidence_score": topic.confidence_score,
+#         "status": topic.status,
+#         "discovered_at": topic.discovered_at,
+#         "updated_at": topic.updated_at,
+#     }
 def serialize_topic(topic: Topic):
     return {
         "id": topic.id,
@@ -277,7 +295,7 @@ def opportunities(db: Session = Depends(get_db)):
         return []
 
     rows = (
-        db.query(Opportunity)
+        db.query(Opportunity,Story)
         .join(
             Story,
             Opportunity.story_id == Story.id,
@@ -292,8 +310,8 @@ def opportunities(db: Session = Depends(get_db)):
     )
 
     return [
-        serialize_opportunity(opportunity)
-        for opportunity in rows
+        serialize_opportunity(opportunity,story)
+        for opportunity,story in rows
     ]
 
 

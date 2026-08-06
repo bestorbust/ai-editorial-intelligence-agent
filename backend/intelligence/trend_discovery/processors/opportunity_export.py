@@ -130,5 +130,8 @@ class OpportunityExportProcessor:
             opportunities.append(
                 opportunity
             )
+        print(
+            f"{opportunity['title'][:40]} -> cluster_size = {opportunity['cluster_size']}"
+        )
 
         return opportunities
