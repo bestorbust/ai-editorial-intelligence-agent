@@ -107,7 +107,10 @@ def serialize_story(story: Story):
     }
 
 
-def serialize_opportunity(opportunity: Opportunity):
+def serialize_opportunity(
+    opportunity: Opportunity,
+    story: Story,
+):
     """
     Keep the API response compatible with the frontend.
 
