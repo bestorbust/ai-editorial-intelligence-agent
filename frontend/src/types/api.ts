@@ -98,6 +98,8 @@ export interface Opportunity {
 
   cluster_size: number;
 
+  category?: string | null;
+
   generated_at: string;
 }
 

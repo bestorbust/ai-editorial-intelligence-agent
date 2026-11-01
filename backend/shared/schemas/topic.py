@@ -5,7 +5,7 @@ class TopicData(BaseModel):
     title:str
     summary:str=""
     source:str
-    cource_url:str
+    source_url:str
     raw_text:str=""
     category:Optional[str]=None
     keywords:List[str]=Field(default_factory=list)

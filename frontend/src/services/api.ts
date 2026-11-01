@@ -66,8 +66,10 @@ function stripHtml(input: string): string {
 interface RawOpportunity {
   id?: number;
   story_id?: number;
+  story_idx?: number;
   headline?: string;
   title?: string;
+  summary?: string;
   score?: number;
   editorial_score?: number;
   category?: string | null;
@@ -82,6 +84,7 @@ interface RawOpportunity {
     scores?: Opportunity["scores"];
     keywords?: string[];
     entities?: string[];
+    category?: string | null;
   };
   // pass-through if backend already returns full shape
   rank?: number;
@@ -122,12 +125,17 @@ function normalizeOpportunity(
     raw.title?.trim() ||
     "Untitled opportunity";
 
+  const rawSummary =
+    typeof raw.summary === "string" && raw.summary.trim()
+      ? raw.summary
+      : explanation.summary ?? "";
+
   return {
     rank: raw.rank ?? index + 1,
     cluster_id: raw.cluster_id ?? raw.story_id ?? raw.id ?? index,
-    story_idx: raw.story_id ?? null,
+    story_idx: raw.story_id ?? raw.story_idx ?? null,
     title,
-    summary: stripHtml(explanation.summary ?? ""),
+    summary: stripHtml(rawSummary),
     editorial_score: raw.editorial_score ?? raw.score ?? 0,
     scores,
     keywords: raw.keywords ?? explanation.keywords ?? [],
@@ -138,6 +146,7 @@ function normalizeOpportunity(
     recommended_formats:
       raw.recommended_formats ?? explanation.recommended_formats ?? [],
     cluster_size: raw.cluster_size ?? 0,
+    category: raw.category ?? explanation.category ?? null,
     generated_at: raw.generated_at ?? "",
   };
 }
@@ -145,7 +154,13 @@ function normalizeOpportunity(
 export const intelligenceApi = {
   getDashboard: (): Promise<DashboardData> => request<DashboardData>("/dashboard"),
   getTopics: (): Promise<Topic[]> => request<Topic[]>("/topics"),
-  getStories: (): Promise<Story[]> => request<Story[]>("/stories"),
+  getStories: async (): Promise<Story[]> => {
+    const data = await request<Story[] | Record<string, Story>>("/stories");
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (typeof data === "object") return Object.values(data);
+    return [];
+  },
   getOpportunities: async (): Promise<Opportunity[]> => {
     const data = await request<RawOpportunity[]>("/opportunities");
     if (!Array.isArray(data)) return [];
