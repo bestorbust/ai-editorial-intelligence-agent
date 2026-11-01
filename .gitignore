@@ -38,4 +38,4 @@ Thumbs.db
 *.sw?
 
 # --- Frontend Specific (if needed separately) ---
-frontend/
+frontend/dist/
